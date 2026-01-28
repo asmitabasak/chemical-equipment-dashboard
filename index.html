@@ -1,0 +1,723 @@
+DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Equipment Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #ee5a52;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: #4ecdc4;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #45b8ad;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 18px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .equipment-type {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .type-pump {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .type-valve {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .type-exchanger {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .type-tank {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .charts-section {
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .chart-container h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .chart-container canvas {
+            max-height: 300px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 12px;
+            }
+
+            .stat-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚗️ Chemical Equipment Management System</h1>
+            <p>Monitor and manage your chemical processing equipment</p>
+        </header>
+
+        <div class="stat-cards" id="statCards">
+            <!-- Stats will be populated by JavaScript -->
+        </div>
+
+        <div class="controls">
+            <input 
+                type="text" 
+                class="search-box" 
+                id="searchInput" 
+                placeholder="Search equipment by name..."
+            >
+            <select class="filter-select" id="typeFilter">
+                <option value="">All Types</option>
+                <option value="pump">Pump</option>
+                <option value="valve">Valve</option>
+                <option value="exchanger">Exchanger</option>
+                <option value="tank">Tank</option>
+            </select>
+            <button class="btn btn-primary" id="resetBtn">Reset Filters</button>
+            <button class="btn btn-secondary" id="exportBtn">Export Data</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipment Name</th>
+                        <th>Type</th>
+                        <th>Flowrate (m³/h)</th>
+                        <th>Pressure (bar)</th>
+                        <th>Temperature (°C)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="charts-section">
+            <h2 style="color: white; margin-bottom: 30px; font-size: 2rem;">📊 Analytics & Visualizations</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Temperature Distribution</h3>
+                    <canvas id="temperatureChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Pressure Levels</h3>
+                    <canvas id="pressureChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Flowrate Comparison</h3>
+                    <canvas id="flowrateChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Equipment Type Distribution</h3>
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Equipment data from CSV
+        const equipmentData = [
+            {
+                name: "Centrifugal Pump A1",
+                type: "Pump",
+                flowrate: 120.5,
+                pressure: 45.2,
+                temperature: 85.0
+            },
+            {
+                name: "High-Pressure Valve V2",
+                type: "Valve",
+                flowrate: 0.0,
+                pressure: 110.8,
+                temperature: 40.5
+            },
+            {
+                name: "Heat Exchanger HX-10",
+                type: "Exchanger",
+                flowrate: 350.0,
+                pressure: 15.5,
+                temperature: 180.0
+            },
+            {
+                name: "Backup Pump A2",
+                type: "Pump",
+                flowrate: 115.0,
+                pressure: 42.0,
+                temperature: 82.5
+            },
+            {
+                name: "Control Valve V5",
+                type: "Valve",
+                flowrate: 45.2,
+                pressure: 65.0,
+                temperature: 55.0
+            },
+            {
+                name: "Storage Tank T1",
+                type: "Tank",
+                flowrate: 0.0,
+                pressure: 2.5,
+                temperature: 25.0
+            },
+            {
+                name: "Cooling Tower CT1",
+                type: "Exchanger",
+                flowrate: 500.0,
+                pressure: 5.0,
+                temperature: 30.0
+            }
+        ];
+
+        let filteredData = [...equipmentData];
+
+        // Chart instances
+        let temperatureChart = null;
+        let pressureChart = null;
+        let flowrateChart = null;
+        let typeChart = null;
+
+        // Get DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const typeFilter = document.getElementById('typeFilter');
+        const tableBody = document.getElementById('tableBody');
+        const resetBtn = document.getElementById('resetBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const statCards = document.getElementById('statCards');
+
+        // Initialize
+        function init() {
+            renderTable(equipmentData);
+            updateStats(equipmentData);
+            renderCharts(equipmentData);
+        }
+
+        // Render table
+        function renderTable(data) {
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="no-data">No equipment found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = data.map(item => `
+                <tr>
+                    <td><strong>${item.name}</strong></td>
+                    <td>
+                        <span class="equipment-type type-${item.type.toLowerCase()}">
+                            ${item.type}
+                        </span>
+                    </td>
+                    <td>${item.flowrate.toFixed(1)}</td>
+                    <td>${item.pressure.toFixed(1)}</td>
+                    <td>${item.temperature.toFixed(1)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update statistics
+        function updateStats(data) {
+            const totalEquipment = data.length;
+            const avgTemp = (data.reduce((sum, item) => sum + item.temperature, 0) / data.length).toFixed(1);
+            const maxPressure = Math.max(...data.map(item => item.pressure)).toFixed(1);
+
+            statCards.innerHTML = `
+                <div class="stat-card">
+                    <h3>${totalEquipment}</h3>
+                    <p>Total Equipment</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${avgTemp}°C</h3>
+                    <p>Average Temperature</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${maxPressure} bar</h3>
+                    <p>Max Pressure</p>
+                </div>
+            `;
+        }
+
+        // Filter function
+        function filterData() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const typeValue = typeFilter.value.toLowerCase();
+
+            filteredData = equipmentData.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                const matchesType = !typeValue || item.type.toLowerCase() === typeValue;
+                return matchesSearch && matchesType;
+            });
+
+            renderTable(filteredData);
+            updateStats(filteredData);
+            renderCharts(filteredData);
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', filterData);
+        typeFilter.addEventListener('change', filterData);
+
+        // Reset filters
+        resetBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            typeFilter.value = '';
+            filteredData = [...equipmentData];
+            renderTable(equipmentData);
+            updateStats(equipmentData);
+            renderCharts(equipmentData);
+        });
+
+        // Export to CSV
+        exportBtn.addEventListener('click', () => {
+            let csv = 'Equipment Name,Type,Flowrate (m³/h),Pressure (bar),Temperature (°C)\n';
+            
+            filteredData.forEach(item => {
+                csv += `"${item.name}","${item.type}",${item.flowrate},${item.pressure},${item.temperature}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'equipment_data.csv';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        });
+
+        // Render Charts
+        function renderCharts(data) {
+            // Destroy existing charts
+            if (temperatureChart) temperatureChart.destroy();
+            if (pressureChart) pressureChart.destroy();
+            if (flowrateChart) flowrateChart.destroy();
+            if (typeChart) typeChart.destroy();
+
+            // Temperature Chart
+            const tempCtx = document.getElementById('temperatureChart').getContext('2d');
+            temperatureChart = new Chart(tempCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.name),
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: data.map(item => item.temperature),
+                        backgroundColor: [
+                            '#ff6b6b',
+                            '#ff8c8c',
+                            '#ffa5a5',
+                            '#ff7575',
+                            '#ff9999',
+                            '#ffb3b3',
+                            '#ff5555'
+                        ],
+                        borderColor: '#ff6b6b',
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Temperature (°C)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Pressure Chart
+            const pressureCtx = document.getElementById('pressureChart').getContext('2d');
+            pressureChart = new Chart(pressureCtx, {
+                type: 'line',
+                data: {
+                    labels: data.map(item => item.name),
+                    datasets: [{
+                        label: 'Pressure (bar)',
+                        data: data.map(item => item.pressure),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Flowrate Chart
+            const flowrateCtx = document.getElementById('flowrateChart').getContext('2d');
+            flowrateChart = new Chart(flowrateCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(item => item.name),
+                    datasets: [{
+                        label: 'Flowrate (m³/h)',
+                        data: data.map(item => item.flowrate),
+                        backgroundColor: [
+                            '#4ecdc4',
+                            '#45b8ad',
+                            '#3da39f',
+                            '#35908f',
+                            '#2d7d7f',
+                            '#256a6f',
+                            '#1d575f'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'right',
+                            labels: {
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Equipment Type Distribution Chart
+            const types = {};
+            data.forEach(item => {
+                types[item.type] = (types[item.type] || 0) + 1;
+            });
+
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            typeChart = new Chart(typeCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(types),
+                    datasets: [{
+                        label: 'Equipment Count',
+                        data: Object.values(types),
+                        backgroundColor: [
+                            '#fff3cd',
+                            '#d1ecf1',
+                            '#d4edda',
+                            '#f8d7da'
+                        ],
+                        borderColor: ['#856404', '#0c5460', '#155724', '#721c24'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 12 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the page
+        init();
+    </script>
+</body>
+</html>
