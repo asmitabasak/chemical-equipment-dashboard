@@ -1,0 +1,8 @@
+Equipment Name,Type,Flowrate (m3/h),Pressure (bar),Temperature (C)
+Centrifugal Pump A1,Pump,120.5,45.2,85.0
+High-Pressure Valve V2,Valve,0.0,110.8,40.5
+Heat Exchanger HX-10,Exchanger,350.0,15.5,180.0
+Backup Pump A2,Pump,115.0,42.1,82.5
+Control Valve V5,Valve,45.2,65.4,55.0
+Storage Tank T1,Tank,0.0,2.5,25.0
+Cooling Tower CT1,Exchanger,500.0,5.0,30.0
